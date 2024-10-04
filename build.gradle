@@ -1,0 +1,69 @@
+
+plugins {
+    id 'org.springframework.boot' version '2.7.0'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+    id 'org.openapi.generator' version '7.0.1'
+}
+
+group = 'com.example'
+version = 'unspecified'
+sourceCompatibility = '11'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+def specDir = '/Users/shishir/Desktop/cb-provider-spi/../cb-provider-spi/spec/spi'
+
+
+openApiGenerate {
+    generatorName = 'spring'
+    inputSpec = "${specDir}/openapi_location_validation.yml"
+    outputDir = "${projectDir}/src/main/java"
+    apiPackage = "com.example.generated.api"
+    modelPackage = "com.example.generated.model"
+    configOptions = [
+        dateLibrary: 'java8',
+        interfaceOnly: 'true',
+        useSpringBoot3: 'true'
+    ]
+}
+
+
+openApiGenerate {
+    generatorName = 'spring'
+    inputSpec = "${specDir}/openapi_tax.yml"
+    outputDir = "${projectDir}/src/main/java"
+    apiPackage = "com.example.generated.api"
+    modelPackage = "com.example.generated.model"
+    configOptions = [
+        dateLibrary: 'java8',
+        interfaceOnly: 'true',
+        useSpringBoot3: 'true'
+    ]
+}
+
+
+openApiGenerate {
+    generatorName = 'spring'
+    inputSpec = "${specDir}/openapi_trn.yml"
+    outputDir = "${projectDir}/src/main/java"
+    apiPackage = "com.example.generated.api"
+    modelPackage = "com.example.generated.model"
+    configOptions = [
+        dateLibrary: 'java8',
+        interfaceOnly: 'true',
+        useSpringBoot3: 'true'
+    ]
+}
+
+
+tasks.named('compileJava') {
+    dependsOn tasks.withType(org.openapitools.generator.gradle.plugin.tasks.GenerateTask)
+}
