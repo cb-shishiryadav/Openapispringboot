@@ -20,50 +20,42 @@ dependencies {
 }
 
 def specDir = '/Users/shishir/Desktop/cb-provider-spi/../cb-provider-spi/spec/spi'
+def specs = ['openapi_location_validation.yml', 'openapi_tax.yml', 'openapi_trn.yml']
 
-
-openApiGenerate {
-    generatorName = 'spring'
-    inputSpec = "${specDir}/openapi_location_validation.yml"
-    outputDir = "${projectDir}/src/main/java"
-    apiPackage = "com.example.generated.api"
-    modelPackage = "com.example.generated.model"
-    configOptions = [
-        dateLibrary: 'java8',
-        interfaceOnly: 'true',
-        useSpringBoot3: 'true'
-    ]
+specs.each { spec ->
+    def taskName = "openApiGenerate_${spec.replace('.yml', '')}"
+    tasks.register(taskName, org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+        generatorName = 'spring'
+        inputSpec = "$specDir/$spec"
+        outputDir = "$projectDir/build/generated-${spec.replace('.yml', '')}"
+        apiPackage = "com.example.generated.api.${spec.replace('.yml', '').replace('_', '')}"
+        modelPackage = "com.example.generated.model.${spec.replace('.yml', '').replace('_', '')}"
+        configOptions = [
+            dateLibrary: 'java8',
+            interfaceOnly: 'true',
+            useSpringBoot3: 'true'
+        ]
+    }
 }
 
-
-openApiGenerate {
-    generatorName = 'spring'
-    inputSpec = "${specDir}/openapi_tax.yml"
-    outputDir = "${projectDir}/src/main/java"
-    apiPackage = "com.example.generated.api"
-    modelPackage = "com.example.generated.model"
-    configOptions = [
-        dateLibrary: 'java8',
-        interfaceOnly: 'true',
-        useSpringBoot3: 'true'
-    ]
+tasks.named('openApiGenerate').configure {
+    enabled = false
 }
 
-
-openApiGenerate {
-    generatorName = 'spring'
-    inputSpec = "${specDir}/openapi_trn.yml"
-    outputDir = "${projectDir}/src/main/java"
-    apiPackage = "com.example.generated.api"
-    modelPackage = "com.example.generated.model"
-    configOptions = [
-        dateLibrary: 'java8',
-        interfaceOnly: 'true',
-        useSpringBoot3: 'true'
-    ]
-}
-
-
-tasks.named('compileJava') {
+tasks.register('openApiGenerateAll') {
     dependsOn tasks.withType(org.openapitools.generator.gradle.plugin.tasks.GenerateTask)
+    .matching { it.name != 'openApiGenerate' }
 }
+
+sourceSets {
+    main {
+        java {
+            srcDir "src/main/java"
+            srcDir "$projectDir/build/generated-openapi_location_validation/src/main/java"
+            srcDir "$projectDir/build/generated-openapi_tax/src/main/java"
+            srcDir "$projectDir/build/generated-openapi_trn/src/main/java"
+        }
+    }
+}
+
+compileJava.dependsOn tasks.openApiGenerateAll
